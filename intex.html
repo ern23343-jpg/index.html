@@ -1,0 +1,1331 @@
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,user-scalable=no">
+
+<title>SHIP COMMAND // BRIDGE CONTROL</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#02070a;
+    color:#d8f7ff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+#app{
+    width:100%;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 40%,#0b2029 0,#041016 35%,#010405 100%);
+}
+
+/* ================= TOP BAR ================= */
+
+.topbar{
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    border-bottom:1px solid #1b4854;
+    background:rgba(2,9,13,.96);
+    position:relative;
+    z-index:10;
+}
+
+.brand{
+    font-size:17px;
+    font-weight:bold;
+    letter-spacing:4px;
+    color:#73eaff;
+}
+
+.subtitle{
+    font-size:9px;
+    letter-spacing:2px;
+    color:#5b8d98;
+    margin-top:4px;
+}
+
+.topStatus{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:10px;
+    letter-spacing:2px;
+}
+
+.statusLight{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#4d5558;
+}
+
+.statusLight.on{
+    background:#00ff9d;
+    box-shadow:0 0 14px #00ff9d;
+}
+
+/* ================= MAIN ================= */
+
+.main{
+    height:calc(100% - 68px);
+    display:grid;
+    grid-template-columns:235px minmax(400px,1fr) 235px;
+    gap:10px;
+    padding:10px;
+}
+
+/* ================= PANELS ================= */
+
+.panel{
+    border:1px solid #17404b;
+    background:rgba(3,13,18,.9);
+    border-radius:9px;
+    overflow:hidden;
+    box-shadow:
+        inset 0 0 30px rgba(0,180,220,.025),
+        0 5px 25px rgba(0,0,0,.3);
+}
+
+.panelTitle{
+    height:39px;
+    display:flex;
+    align-items:center;
+    padding:0 12px;
+    border-bottom:1px solid #163842;
+    color:#72dff0;
+    font-size:10px;
+    letter-spacing:2px;
+}
+
+/* ================= LEFT CONTROL ================= */
+
+.controlBody{
+    padding:10px;
+}
+
+.controlSection{
+    margin-bottom:13px;
+}
+
+.sectionLabel{
+    color:#4d7b84;
+    font-size:8px;
+    letter-spacing:2px;
+    margin:8px 2px;
+}
+
+button{
+    width:100%;
+    min-height:47px;
+    margin-bottom:7px;
+    border-radius:6px;
+    border:1px solid #24505b;
+    background:linear-gradient(#0b2028,#061117);
+    color:#c5f3fa;
+    font-size:10px;
+    font-weight:bold;
+    letter-spacing:1.5px;
+    transition:.12s;
+    cursor:pointer;
+}
+
+button:active{
+    transform:scale(.97);
+}
+
+button:hover{
+    border-color:#43d9ec;
+}
+
+button.active{
+    border-color:#00e9c1;
+    color:#00ffc9;
+    background:linear-gradient(#063b3d,#052426);
+    box-shadow:0 0 13px rgba(0,255,205,.12);
+}
+
+button.red{
+    border-color:#67383b;
+    color:#ff8989;
+}
+
+button.red.active{
+    border-color:#ff4040;
+    color:#ff5b5b;
+    background:#330c0c;
+    box-shadow:0 0 18px rgba(255,40,40,.18);
+}
+
+/* ================= CENTER ================= */
+
+.center{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+}
+
+.centerContent{
+    position:relative;
+    flex:1;
+    min-height:0;
+}
+
+/* ================= RADAR ================= */
+
+.radarWrap{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.radar{
+    position:relative;
+    width:min(54vh,46vw,510px);
+    height:min(54vh,46vw,510px);
+    border:2px solid #166b79;
+    border-radius:50%;
+    background:
+      radial-gradient(circle,
+        transparent 0 18%,
+        rgba(22,145,160,.12) 18.3% 18.7%,
+        transparent 19% 37%,
+        rgba(22,145,160,.12) 37.3% 37.7%,
+        transparent 38% 57%,
+        rgba(22,145,160,.12) 57.3% 57.7%,
+        transparent 58%);
+    box-shadow:
+        0 0 35px rgba(0,190,220,.1),
+        inset 0 0 45px rgba(0,150,180,.08);
+}
+
+.radarLineX,
+.radarLineY{
+    position:absolute;
+    background:#185966;
+    opacity:.8;
+}
+
+.radarLineX{
+    width:100%;
+    height:1px;
+    top:50%;
+}
+
+.radarLineY{
+    height:100%;
+    width:1px;
+    left:50%;
+}
+
+.radarSweep{
+    position:absolute;
+    width:50%;
+    height:2px;
+    left:50%;
+    top:50%;
+    transform-origin:left center;
+    background:linear-gradient(90deg,#00ffc8,rgba(0,255,200,0));
+    box-shadow:0 0 13px #00ffc8;
+    animation:sweep 3s linear infinite;
+}
+
+@keyframes sweep{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+}
+
+.radar.off{
+    opacity:.25;
+    filter:grayscale(1);
+}
+
+.radar.off .radarSweep,
+.radar.off .target{
+    display:none;
+}
+
+.target{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#00ffb8;
+    box-shadow:0 0 12px #00ffb8;
+    animation:targetPulse 1.3s infinite alternate;
+}
+
+@keyframes targetPulse{
+    from{opacity:.35}
+    to{opacity:1}
+}
+
+.t1{left:67%;top:26%}
+.t2{left:29%;top:59%}
+.t3{left:74%;top:69%}
+.t4{left:21%;top:38%}
+
+.radarTop{
+    position:absolute;
+    top:15px;
+    left:18px;
+    right:18px;
+    display:flex;
+    justify-content:space-between;
+    font-size:8px;
+    letter-spacing:2px;
+    color:#5e9da7;
+}
+
+/* ================= SHIP VIEW ================= */
+
+.shipView{
+    position:absolute;
+    bottom:9px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90px;
+    height:90px;
+    pointer-events:none;
+}
+
+.shipBody{
+    position:absolute;
+    width:18px;
+    height:55px;
+    left:36px;
+    top:18px;
+    background:#b5d7dc;
+    clip-path:polygon(50% 0,100% 30%,88% 100%,12% 100%,0 30%);
+    opacity:.9;
+    box-shadow:0 0 12px rgba(170,240,255,.3);
+}
+
+/* ================= LOWER INFO ================= */
+
+.lowerInfo{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height:112px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
+    padding:7px;
+    background:rgba(2,9,13,.92);
+    border-top:1px solid #163b44;
+}
+
+.dataBox{
+    border:1px solid #143b45;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.dataLabel{
+    font-size:8px;
+    color:#54808a;
+    letter-spacing:2px;
+}
+
+.dataValue{
+    margin-top:7px;
+    font-size:21px;
+    font-weight:bold;
+    color:#d4faff;
+}
+
+/* ================= RIGHT MONITOR ================= */
+
+.monitorBody{
+    padding:11px;
+}
+
+.gauge{
+    margin-bottom:17px;
+}
+
+.gaugeTop{
+    display:flex;
+    justify-content:space-between;
+    font-size:8px;
+    color:#67919a;
+    letter-spacing:1px;
+    margin-bottom:6px;
+}
+
+.gaugeBar{
+    height:11px;
+    border-radius:20px;
+    overflow:hidden;
+    border:1px solid #173c46;
+    background:#061116;
+}
+
+.gaugeFill{
+    height:100%;
+    width:100%;
+    transition:.3s;
+    background:#00d9a5;
+    box-shadow:0 0 10px rgba(0,255,190,.35);
+}
+
+.fuelFill{
+    background:#e7c74d;
+}
+
+.tempFill{
+    background:#4bbce8;
+}
+
+.systemList{
+    border-top:1px solid #173842;
+    margin-top:10px;
+    padding-top:9px;
+}
+
+.systemRow{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid rgba(20,60,70,.35);
+    font-size:8px;
+    letter-spacing:1px;
+    color:#648b94;
+}
+
+.ok{
+    color:#00ffa9;
+}
+
+.warn{
+    color:#ffd34e;
+}
+
+.off{
+    color:#707a7d;
+}
+
+/* ================= THROTTLE ================= */
+
+.throttle{
+    margin-top:15px;
+    padding-top:12px;
+    border-top:1px solid #173842;
+}
+
+.throttleLabel{
+    display:flex;
+    justify-content:space-between;
+    font-size:8px;
+    letter-spacing:2px;
+    color:#668f98;
+    margin-bottom:9px;
+}
+
+input[type=range]{
+    width:100%;
+    accent-color:#00dcb0;
+}
+
+/* ================= WATER ================= */
+
+.water{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:65px;
+    overflow:hidden;
+    opacity:.5;
+    pointer-events:none;
+}
+
+.wave{
+    position:absolute;
+    width:180%;
+    left:-40%;
+    height:30px;
+    border-top:1px solid #116173;
+    border-radius:50%;
+    animation:waveMove 7s linear infinite;
+}
+
+.wave:nth-child(1){top:15px}
+.wave:nth-child(2){top:35px;animation-duration:9s}
+.wave:nth-child(3){top:53px;animation-duration:11s}
+
+@keyframes waveMove{
+    from{transform:translateX(0)}
+    to{transform:translateX(18%)}
+}
+
+/* ================= ALERT ================= */
+
+.alert{
+    position:absolute;
+    z-index:100;
+    top:82px;
+    left:50%;
+    transform:translateX(-50%);
+    min-width:220px;
+    text-align:center;
+    padding:9px 15px;
+    border:1px solid #e83e3e;
+    border-radius:6px;
+    background:#350b0b;
+    color:#ff7676;
+    font-size:9px;
+    letter-spacing:2px;
+    opacity:0;
+    pointer-events:none;
+    transition:.2s;
+}
+
+.alert.show{
+    opacity:1;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:850px){
+
+    html,body{
+        overflow:auto;
+    }
+
+    #app{
+        min-height:100%;
+        height:auto;
+    }
+
+    .main{
+        height:auto;
+        min-height:calc(100vh - 68px);
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto auto;
+    }
+
+    .left{
+        order:2;
+    }
+
+    .center{
+        order:1;
+        height:590px;
+    }
+
+    .right{
+        order:3;
+    }
+
+    .radar{
+        width:min(72vw,390px);
+        height:min(72vw,390px);
+    }
+
+    .controlBody{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:5px;
+    }
+
+    .controlSection{
+        margin:0;
+    }
+
+    .sectionLabel{
+        display:none;
+    }
+
+    button{
+        margin:0;
+    }
+
+    .lowerInfo{
+        height:100px;
+    }
+}
+
+@media(max-width:480px){
+
+    .brand{
+        font-size:13px;
+        letter-spacing:2px;
+    }
+
+    .subtitle{
+        display:none;
+    }
+
+    .topStatus{
+        font-size:8px;
+    }
+
+    .center{
+        height:510px;
+    }
+
+    .radar{
+        width:78vw;
+        height:78vw;
+    }
+
+    .dataValue{
+        font-size:17px;
+    }
+
+    .lowerInfo{
+        height:90px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<header class="topbar">
+
+    <div>
+        <div class="brand">⚓ SHIP COMMAND</div>
+        <div class="subtitle">BRIDGE CONTROL SYSTEM // SIMULATION</div>
+    </div>
+
+    <div class="topStatus">
+        SYSTEM
+        <span id="statusLight" class="statusLight"></span>
+        <span id="systemStatus">STANDBY</span>
+    </div>
+
+</header>
+
+<div id="alert" class="alert"></div>
+
+<main class="main">
+
+<!-- ================= LEFT ================= -->
+
+<section class="panel left">
+
+    <div class="panelTitle">
+        VESSEL CONTROL
+    </div>
+
+    <div class="controlBody">
+
+        <div class="controlSection">
+
+            <div class="sectionLabel">PROPULSION</div>
+
+            <button id="engineBtn"
+                    onclick="toggleEngine()">
+                🔴 ENGINE START
+            </button>
+
+            <button onclick="stopVessel()">
+                ■ EMERGENCY STOP
+            </button>
+
+        </div>
+
+        <div class="controlSection">
+
+            <div class="sectionLabel">NAVIGATION</div>
+
+            <button onclick="changeHeading(-5)">
+                ◀ PORT
+            </button>
+
+            <button onclick="changeHeading(5)">
+                STARBOARD ▶
+            </button>
+
+            <button id="radarBtn"
+                    onclick="toggleRadar()">
+                📡 RADAR ON
+            </button>
+
+        </div>
+
+        <div class="controlSection">
+
+            <div class="sectionLabel">VESSEL SYSTEMS</div>
+
+            <button id="lightsBtn"
+                    onclick="toggleLights()">
+                💡 NAV LIGHTS
+            </button>
+
+            <button id="hornBtn"
+                    onclick="horn()">
+                📢 SHIP HORN
+            </button>
+
+            <button class="red"
+                    onclick="alarm()">
+                🚨 GENERAL ALARM
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CENTER ================= -->
+
+<section class="panel center">
+
+    <div class="panelTitle">
+        NAVIGATION DISPLAY // RADAR
+    </div>
+
+    <div class="centerContent">
+
+        <div class="radarWrap">
+
+            <div id="radar" class="radar">
+
+                <div class="radarTop">
+                    <span>RANGE 12 NM</span>
+                    <span id="radarMode">SCANNING</span>
+                </div>
+
+                <div class="radarLineX"></div>
+                <div class="radarLineY"></div>
+
+                <div class="radarSweep"></div>
+
+                <div class="target t1"></div>
+                <div class="target t2"></div>
+                <div class="target t3"></div>
+                <div class="target t4"></div>
+
+            </div>
+
+        </div>
+
+        <div class="shipView">
+            <div class="shipBody"></div>
+        </div>
+
+        <div class="water">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+
+        <div class="lowerInfo">
+
+            <div class="dataBox">
+                <div class="dataLabel">SPEED</div>
+                <div class="dataValue">
+                    <span id="speed">0</span> KN
+                </div>
+            </div>
+
+            <div class="dataBox">
+                <div class="dataLabel">HEADING</div>
+                <div class="dataValue">
+                    <span id="heading">090</span>°
+                </div>
+            </div>
+
+            <div class="dataBox">
+                <div class="dataLabel">DEPTH</div>
+                <div class="dataValue">
+                    <span id="depth">124</span> M
+                </div>
+            </div>
+
+            <div class="dataBox">
+                <div class="dataLabel">RPM</div>
+                <div class="dataValue">
+                    <span id="rpm">0</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= RIGHT ================= -->
+
+<section class="panel right">
+
+    <div class="panelTitle">
+        ENGINE & SYSTEM MONITOR
+    </div>
+
+    <div class="monitorBody">
+
+        <div class="gauge">
+
+            <div class="gaugeTop">
+                <span>FUEL</span>
+                <span id="fuelText">100%</span>
+            </div>
+
+            <div class="gaugeBar">
+                <div id="fuelBar"
+                     class="gaugeFill fuelFill"></div>
+            </div>
+
+        </div>
+
+
+        <div class="gauge">
+
+            <div class="gaugeTop">
+                <span>ENGINE POWER</span>
+                <span id="powerText">0%</span>
+            </div>
+
+            <div class="gaugeBar">
+                <div id="powerBar"
+                     class="gaugeFill"></div>
+            </div>
+
+        </div>
+
+
+        <div class="gauge">
+
+            <div class="gaugeTop">
+                <span>ENGINE TEMP.</span>
+                <span id="tempText">22°C</span>
+            </div>
+
+            <div class="gaugeBar">
+                <div id="tempBar"
+                     class="gaugeFill tempFill"></div>
+            </div>
+
+        </div>
+
+
+        <div class="throttle">
+
+            <div class="throttleLabel">
+                <span>THROTTLE</span>
+                <span id="throttleText">0%</span>
+            </div>
+
+            <input id="throttle"
+                   type="range"
+                   min="0"
+                   max="100"
+                   value="0"
+                   oninput="setThrottle(this.value)">
+
+        </div>
+
+
+        <div class="systemList">
+
+            <div class="systemRow">
+                <span>MAIN ENGINE</span>
+                <b id="engineState" class="off">OFF</b>
+            </div>
+
+            <div class="systemRow">
+                <span>RADAR</span>
+                <b id="radarState" class="ok">ON</b>
+            </div>
+
+            <div class="systemRow">
+                <span>NAVIGATION</span>
+                <b id="navState" class="ok">READY</b>
+            </div>
+
+            <div class="systemRow">
+                <span>NAV LIGHTS</span>
+                <b id="lightState" class="off">OFF</b>
+            </div>
+
+            <div class="systemRow">
+                <span>AUTOPILOT</span>
+                <b class="off">STANDBY</b>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+
+<script>
+
+/* ================= STATE ================= */
+
+let engine=false;
+let radar=true;
+let lights=false;
+
+let speed=0;
+let heading=90;
+let depth=124;
+
+let fuel=100;
+let power=0;
+let temp=22;
+let rpm=0;
+let throttle=0;
+
+let audioCtx=null;
+let engineOsc=null;
+let engineGain=null;
+
+
+/* ================= AUDIO ================= */
+
+function audioInit(){
+
+    if(!audioCtx){
+        audioCtx =
+          new (window.AudioContext ||
+               window.webkitAudioContext)();
+    }
+
+    if(audioCtx.state==="suspended"){
+        audioCtx.resume();
+    }
+}
+
+
+function startEngineSound(){
+
+    audioInit();
+
+    if(engineOsc) return;
+
+    engineOsc=audioCtx.createOscillator();
+    engineGain=audioCtx.createGain();
+
+    engineOsc.type="sawtooth";
+    engineOsc.frequency.value=65;
+
+    engineGain.gain.value=.025;
+
+    engineOsc.connect(engineGain);
+    engineGain.connect(audioCtx.destination);
+
+    engineOsc.start();
+}
+
+
+function stopEngineSound(){
+
+    if(engineOsc){
+
+        engineOsc.stop();
+        engineOsc.disconnect();
+
+        engineOsc=null;
+        engineGain=null;
+    }
+}
+
+
+function horn(){
+
+    audioInit();
+
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+
+    osc.type="square";
+    osc.frequency.value=190;
+
+    gain.gain.value=.07;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+
+    setTimeout(()=>{
+        osc.frequency.value=160;
+    },350);
+
+    setTimeout(()=>{
+        osc.stop();
+    },900);
+
+    showAlert("📢 SHIP HORN");
+}
+
+
+/* ================= ENGINE ================= */
+
+function toggleEngine(){
+
+    engine=!engine;
+
+    const btn=document.getElementById("engineBtn");
+
+    if(engine){
+
+        btn.classList.add("active");
+        btn.innerHTML="🟢 ENGINE STOP";
+
+        document.getElementById("engineState").innerText="RUNNING";
+        document.getElementById("engineState").className="ok";
+
+        document.getElementById("statusLight")
+            .classList.add("on");
+
+        document.getElementById("systemStatus")
+            .innerText="ONLINE";
+
+        startEngineSound();
+
+        showAlert("ENGINE STARTED");
+
+    }else{
+
+        btn.classList.remove("active");
+        btn.innerHTML="🔴 ENGINE START";
+
+        document.getElementById("engineState").innerText="OFF";
+        document.getElementById("engineState").className="off";
+
+        document.getElementById("statusLight")
+            .classList.remove("on");
+
+        document.getElementById("systemStatus")
+            .innerText="STANDBY";
+
+        stopEngineSound();
+
+        throttle=0;
+        document.getElementById("throttle").value=0;
+
+        showAlert("ENGINE STOPPED");
+    }
+}
+
+
+/* ================= RADAR ================= */
+
+function toggleRadar(){
+
+    radar=!radar;
+
+    const radarEl=document.getElementById("radar");
+    const btn=document.getElementById("radarBtn");
+
+    if(radar){
+
+        radarEl.classList.remove("off");
+
+        btn.classList.add("active");
+        btn.innerHTML="📡 RADAR OFF";
+
+        document.getElementById("radarMode")
+            .innerText="SCANNING";
+
+        document.getElementById("radarState")
+            .innerText="ON";
+
+        document.getElementById("radarState")
+            .className="ok";
+
+    }else{
+
+        radarEl.classList.add("off");
+
+        btn.classList.remove("active");
+        btn.innerHTML="📡 RADAR ON";
+
+        document.getElementById("radarMode")
+            .innerText="STANDBY";
+
+        document.getElementById("radarState")
+            .innerText="OFF";
+
+        document.getElementById("radarState")
+            .className="off";
+    }
+}
+
+
+/* ================= LIGHTS ================= */
+
+function toggleLights(){
+
+    lights=!lights;
+
+    const btn=document.getElementById("lightsBtn");
+    const state=document.getElementById("lightState");
+
+    if(lights){
+
+        btn.classList.add("active");
+        btn.innerHTML="💡 NAV LIGHTS OFF";
+
+        state.innerText="ON";
+        state.className="ok";
+
+    }else{
+
+        btn.classList.remove("active");
+        btn.innerHTML="💡 NAV LIGHTS";
+
+        state.innerText="OFF";
+        state.className="off";
+    }
+}
+
+
+/* ================= THROTTLE ================= */
+
+function setThrottle(value){
+
+    throttle=Number(value);
+
+    document.getElementById("throttleText")
+        .innerText=throttle+"%";
+
+    if(!engine){
+
+        throttle=0;
+
+        document.getElementById("throttle").value=0;
+        document.getElementById("throttleText")
+            .innerText="0%";
+
+        showAlert("⚠ START ENGINE FIRST");
+
+        return;
+    }
+
+    power=throttle;
+
+    if(engineOsc){
+
+        engineOsc.frequency.value=
+            55+(throttle*1.5);
+    }
+}
+
+
+/* ================= HEADING ================= */
+
+function changeHeading(amount){
+
+    heading+=amount;
+
+    if(heading>=360)
+        heading-=360;
+
+    if(heading<0)
+        heading+=360;
+
+    document.getElementById("navState")
+        .innerText="MANUAL STEERING";
+
+    document.getElementById("navState")
+        .className="ok";
+}
+
+
+/* ================= STOP ================= */
+
+function stopVessel(){
+
+    throttle=0;
+    power=0;
+    speed=0;
+
+    document.getElementById("throttle").value=0;
+    document.getElementById("throttleText").innerText="0%";
+
+    document.getElementById("navState")
+        .innerText="EMERGENCY STOP";
+
+    document.getElementById("navState")
+        .className="warn";
+
+    showAlert("■ VESSEL STOPPED");
+}
+
+
+/* ================= ALARM ================= */
+
+function alarm(){
+
+    audioInit();
+
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+
+    osc.type="square";
+    osc.frequency.value=800;
+
+    gain.gain.value=.045;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+
+    setTimeout(()=>{
+        osc.frequency.value=500;
+    },250);
+
+    setTimeout(()=>{
+        osc.stop();
+    },550);
+
+    showAlert("🚨 GENERAL ALARM");
+}
+
+
+/* ================= ALERT ================= */
+
+function showAlert(message){
+
+    const alert=document.getElementById("alert");
+
+    alert.innerText=message;
+    alert.classList.add("show");
+
+    setTimeout(()=>{
+        alert.classList.remove("show");
+    },1700);
+}
+
+
+/* ================= MAIN UPDATE ================= */
+
+setInterval(()=>{
+
+    if(engine){
+
+        const targetSpeed =
+            throttle*.32;
+
+        speed +=
+            (targetSpeed-speed)*.08;
+
+        rpm =
+            throttle*20;
+
+        power=throttle;
+
+        fuel -=
+            throttle*.0007;
+
+        if(fuel<0)
+            fuel=0;
+
+        temp =
+            22+(power*.42);
+
+    }else{
+
+        speed*=.92;
+        rpm*=.9;
+        power*=.9;
+
+        temp-=.15;
+
+        if(temp<22)
+            temp=22;
+    }
+
+
+    depth +=
+      Math.random()>.5 ? .3 : -.3;
+
+    if(depth<90) depth=90;
+    if(depth>170) depth=170;
+
+
+    /* DISPLAY */
+
+    document.getElementById("speed")
+        .innerText=speed.toFixed(1);
+
+    document.getElementById("heading")
+        .innerText=
+        String(Math.round(heading))
+        .padStart(3,"0");
+
+    document.getElementById("depth")
+        .innerText=Math.round(depth);
+
+    document.getElementById("rpm")
+        .innerText=Math.round(rpm);
+
+
+    document.getElementById("fuelText")
+        .innerText=Math.round(fuel)+"%";
+
+    document.getElementById("fuelBar")
+        .style.width=Math.max(0,fuel)+"%";
+
+
+    document.getElementById("powerText")
+        .innerText=Math.round(power)+"%";
+
+    document.getElementById("powerBar")
+        .style.width=power+"%";
+
+
+    document.getElementById("tempText")
+        .innerText=Math.round(temp)+"°C";
+
+    document.getElementById("tempBar")
+        .style.width=
+        Math.min(100,temp)+"%";
+
+
+},500);
+
+</script>
+
+</body>
+</html>
+```
